@@ -10,7 +10,7 @@ package com.mycompany.nanay;
 import javax.swing.*;
 import java.awt.*;
 
-public class loy extends JFrame {
+public class BuyerAccSettingsGUI extends JFrame {
 
     private JPanel topNav, sideNav, contentPanel, profileCard, formCard;
     private JLabel lblLogo, lblTitle, lblSubtitle;
@@ -20,7 +20,7 @@ public class loy extends JFrame {
     private JTextField txtFullName, txtUsername, txtEmail, txtPhone, txtGender, txtDob;
     private JButton btnSave;
 
-    loy() {
+    BuyerAccSettingsGUI() {
 
         setTitle("Shippiedie - Buyer Account Settings");
         setSize(1280, 720);
@@ -216,6 +216,6 @@ public class loy extends JFrame {
     }
 
     public static void main(String[] args) {
-        new loy();
+        new BuyerAccSettings();
     }
 }

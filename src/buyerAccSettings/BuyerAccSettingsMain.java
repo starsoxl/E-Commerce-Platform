@@ -8,10 +8,10 @@ package com.mycompany.nanay;
  *
  * @author Admin
  */
-public class Nanay {
+public class BuyerAccSettingsMain {
 
     public static void main(String[] args) {
-        loy lo = new loy();
-        lo.setVisible(true);
+        BuyerAccSettingsGUI BuyerAccountSettings = new BuyerAccSettingsGUI ();
+        BuyerAccountSettings.setVisible(true);
     }
 }
