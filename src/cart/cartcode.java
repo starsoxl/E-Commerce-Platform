@@ -1,3 +1,4 @@
+package cart;
 import javax.swing.*;
 import javax.swing.plaf.basic.BasicScrollBarUI;
 import java.awt.*;
@@ -6,6 +7,8 @@ import java.awt.geom.*;
 import java.util.Iterator;
 import java.util.LinkedList;
 
+
+// CHANGE AND CLEAN POPUPS
 /**
  *
  * @author xyrell

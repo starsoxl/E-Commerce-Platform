@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  */
 
-package com.mycompany.nanay;
+package buyerAccSettings;
 
 /**
  *
@@ -10,7 +10,7 @@ package com.mycompany.nanay;
  */
 public class BuyerAccSettingsMain {
 
-    public static void main(String[] args) {
+public static void main(String[] args) {
         BuyerAccSettingsGUI BuyerAccountSettings = new BuyerAccSettingsGUI ();
         BuyerAccountSettings.setVisible(true);
     }
