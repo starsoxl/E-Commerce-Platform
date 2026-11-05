@@ -1,4 +1,4 @@
-package cart;
+package gui.buyer;
 
 import javax.swing.*;
 import javax.swing.plaf.basic.BasicScrollBarUI;
@@ -540,7 +540,7 @@ public class cartcode extends JFrame implements ActionListener {
             return;
         }
 
-        checkoutcode co = new checkoutcode(this, picked, discount);
+        checkoutCode co = new checkoutCode(this, picked, discount);
         co.setVisible(true);
         setVisible(false);
     }

@@ -1,17 +1,17 @@
 package cart;
 
-import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.*;
 import java.util.LinkedList;
+import javax.swing.*;
 import javax.swing.plaf.basic.BasicScrollBarUI;
 
 /**
  *
  * @author xyrell
  */
-public class checkoutcode extends JFrame implements ActionListener {
+public class checkoutCode extends JFrame implements ActionListener {
 
     // ---------- colors (same as the design)
     private Color gold = new Color(205, 171, 91);
@@ -56,7 +56,7 @@ public class checkoutcode extends JFrame implements ActionListener {
     private JButton placeorder;
     private String paymentMethod = "Cash on Delivery";
 
-    checkoutcode(cartcode cart, LinkedList<cartcode.CartItem> items, int discount) {
+    checkoutCode(cartcode cart, LinkedList<cartcode.CartItem> items, int discount) {
 
         this.cart = cart;
         this.items = items;
