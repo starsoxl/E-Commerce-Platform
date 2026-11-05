@@ -48,11 +48,13 @@ public class checkoutcode extends JFrame implements ActionListener {
 
     // ---------- payment method (right side)
     private JPanel paymentpanel, totalpanel, line;
-    private JLabel cardicon, paymentlbl, cashlbl, changepay;
+    private JLabel cardicon, paymentlbl, cashlbl;
+    private JButton changepay;
     private JLabel totalpricelbl, totalpriceval, voucherico, voucherlbl, voucherval, totalpaylbl, totalpayval;
 
     // ---------- place order
     private JButton placeorder;
+    private String paymentMethod = "Cash on Delivery";
 
     checkoutcode(cartcode cart, LinkedList<cartcode.CartItem> items, int discount) {
 
@@ -64,7 +66,7 @@ public class checkoutcode extends JFrame implements ActionListener {
         getContentPane().setPreferredSize(new Dimension(1280, 720));
         getContentPane().setBackground(bg);
         setLayout(null);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         setResizable(false);
 
         // ---------- header
@@ -191,10 +193,14 @@ public class checkoutcode extends JFrame implements ActionListener {
         cashlbl.setBounds(324, 18, 170, 22);
         paymentpanel.add(cashlbl);
 
-        changepay = new JLabel("CHANGE");
-        changepay.setFont(new Font("SansSerif", Font.PLAIN, 15));
+        changepay = new JButton("CHANGE");
+        changepay.setFont(new Font("SansSerif", Font.PLAIN, 13));
         changepay.setForeground(red);
-        changepay.setBounds(491, 18, 80, 22);
+        changepay.setContentAreaFilled(false);
+        changepay.setBorderPainted(false);
+        changepay.setFocusPainted(false);
+        changepay.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        changepay.setBounds(486, 15, 80, 28);
         paymentpanel.add(changepay);
 
         // ---------- totals
@@ -259,6 +265,18 @@ public class checkoutcode extends JFrame implements ActionListener {
 
         // ---------- action listener (connection to the cart: Back to Cart only)
         back.addActionListener(this);
+        change.addActionListener(this);
+        changepay.addActionListener(this);
+        placeorder.addActionListener(this);
+
+        addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent e) {
+                if (cart != null) {
+                    cart.setVisible(true);
+                }
+                dispose();
+            }
+        });
 
         pack();
         if (cart != null) {
@@ -274,13 +292,98 @@ public class checkoutcode extends JFrame implements ActionListener {
     public void actionPerformed(ActionEvent e) {
 
         if (e.getSource() == back) {
-            // show the cart window again and close this checkout window
+            returnToCart();
+        } else if (e.getSource() == change) {
+            changeAddress();
+        } else if (e.getSource() == changepay) {
+            changePaymentMethod();
+        } else if (e.getSource() == placeorder) {
+            placeOrder();
+        }
+    }
+
+    void returnToCart() {
+        if (cart != null) {
+            cart.setVisible(true);
+        }
+        dispose();
+    }
+
+    void changeAddress() {
+        JTextField nameField = new JTextField(custname.getText());
+        JTextField phoneField = new JTextField(phone.getText());
+        JTextField addressField = new JTextField(address.getText());
+
+        JPanel form = new JPanel(new GridLayout(0, 1, 5, 5));
+        form.add(new JLabel("Recipient name:"));
+        form.add(nameField);
+        form.add(new JLabel("Phone number:"));
+        form.add(phoneField);
+        form.add(new JLabel("Delivery address:"));
+        form.add(addressField);
+
+        int result = JOptionPane.showConfirmDialog(this, form,
+                "Change Delivery Address", JOptionPane.OK_CANCEL_OPTION,
+                JOptionPane.PLAIN_MESSAGE);
+
+        if (result == JOptionPane.OK_OPTION) {
+            if (nameField.getText().trim().isEmpty()
+                    || phoneField.getText().trim().isEmpty()
+                    || addressField.getText().trim().isEmpty()) {
+                JOptionPane.showMessageDialog(this,
+                        "Please complete all delivery details.",
+                        "Invalid Address", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            custname.setText(nameField.getText().trim());
+            phone.setText(phoneField.getText().trim());
+            address.setText(addressField.getText().trim());
+        }
+    }
+
+    void changePaymentMethod() {
+        String[] methods = {
+            "Cash on Delivery",
+            "GCash (demo selection)",
+            "Debit/Credit Card (demo selection)"
+        };
+
+        Object selected = JOptionPane.showInputDialog(this,
+                "Choose a payment method:", "Payment Method",
+                JOptionPane.PLAIN_MESSAGE, null, methods, paymentMethod);
+
+        if (selected != null) {
+            paymentMethod = selected.toString();
+            cashlbl.setText(paymentMethod);
+        }
+    }
+
+    void placeOrder() {
+        if (items == null || items.isEmpty()) {
+            JOptionPane.showMessageDialog(this,
+                    "There are no items to place an order.",
+                    "Checkout", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        int confirm = JOptionPane.showConfirmDialog(this,
+                "Confirm your order?\nTotal: " + totalpayval.getText()
+                + "\nPayment: " + paymentMethod,
+                "Confirm Order", JOptionPane.YES_NO_OPTION);
+
+        if (confirm == JOptionPane.YES_OPTION) {
+            JOptionPane.showMessageDialog(this,
+                    "Your order has been placed successfully!\n"
+                    + "Payment method: " + paymentMethod,
+                    "Order Confirmed", JOptionPane.INFORMATION_MESSAGE);
+
             if (cart != null) {
+                cart.completeCheckout(items);
                 cart.setVisible(true);
             }
             dispose();
         }
-
     }
 
     // =====================================================================
@@ -332,8 +435,10 @@ public class checkoutcode extends JFrame implements ActionListener {
     // =====================================================================
     void showTotals() {
         int sub = 0;
-        for (cartcode.CartItem it : items) {
-            sub += it.total();
+        if (items != null) {
+            for (cartcode.CartItem it : items) {
+                sub += it.total();
+            }
         }
         int save = sub * discount / 100;
 

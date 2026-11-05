@@ -1,4 +1,5 @@
 package cart;
+
 import javax.swing.*;
 import javax.swing.plaf.basic.BasicScrollBarUI;
 import java.awt.*;
@@ -7,8 +8,6 @@ import java.awt.geom.*;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-
-// CHANGE AND CLEAN POPUPS
 /**
  *
  * @author xyrell
@@ -58,7 +57,7 @@ public class cartcode extends JFrame implements ActionListener {
     private LinkedList<JLabel> totallabels = new LinkedList<JLabel>();
 
     private int discount = 0;
-    private boolean untouched = true; // shows the exact numbers of the design until the first click
+    private boolean untouched = false;
 
     cartcode() {
 
@@ -525,22 +524,52 @@ public class cartcode extends JFrame implements ActionListener {
     }
 
     void checkoutClicked() {
-        // collect the selected items (LinkedList) to send to the checkout window
+        // Copy the selected item references into a LinkedList for checkout.
         LinkedList<CartItem> picked = new LinkedList<CartItem>();
+
         for (CartItem it : allitems) {
             if (it.selected) {
                 picked.add(it);
             }
         }
+
         if (picked.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Please select at least one item to check out.", "Check Out",
-                    JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this,
+                    "Please select at least one item to check out.",
+                    "Check Out", JOptionPane.WARNING_MESSAGE);
             return;
         }
-        // open the checkout window (with the selected items and the voucher) and hide the cart window
+
         checkoutcode co = new checkoutcode(this, picked, discount);
         co.setVisible(true);
         setVisible(false);
+    }
+
+    // Called by Checkout only after the customer confirms the order.
+    void completeCheckout(LinkedList<CartItem> purchasedItems) {
+        Iterator<Seller> sellerIterator = sellers.iterator();
+
+        while (sellerIterator.hasNext()) {
+            Seller seller = sellerIterator.next();
+            Iterator<CartItem> itemIterator = seller.items.iterator();
+
+            while (itemIterator.hasNext()) {
+                CartItem current = itemIterator.next();
+
+                if (purchasedItems.contains(current)) {
+                    itemIterator.remove();
+                }
+            }
+
+            if (seller.items.isEmpty()) {
+                sellerIterator.remove();
+            }
+        }
+
+        discount = 0;
+        untouched = false;
+        showItems();
+        updateTotals();
     }
 
     // =====================================================================
@@ -613,18 +642,12 @@ public class cartcode extends JFrame implements ActionListener {
     // TOTALS (Cart count, Total, Saved, Select All)
     // =====================================================================
     void updateTotals() {
-        if (untouched) { // exact values of the design
-            title.setText("Cart (0)");
-            totalcount.setText("Total (1):");
-            totalamount.setText(peso + "249");
-            savedamount.setText(peso + "249");
-            selectall.setSelected(false);
-            return;
-        }
-        int count = 0, n = 0, sub = 0;
-        boolean all = true;
+        int count = allitems.size();
+        int n = 0;
+        int sub = 0;
+        boolean all = count > 0;
+
         for (CartItem it : allitems) {
-            count++;
             if (it.selected) {
                 n++;
                 sub += it.total();
@@ -895,5 +918,12 @@ public class cartcode extends JFrame implements ActionListener {
         }
     }
 
-   
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                cartcode f = new cartcode();
+                f.setVisible(true);
+            }
+        });
+    }
 }
