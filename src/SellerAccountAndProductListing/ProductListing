@@ -1,0 +1,359 @@
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.LinkedList;
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+
+public class ProductListing extends JPanel implements ActionListener {
+
+    private JTextField txtName, txtCategory, txtPrice, txtStock;
+    private JTextArea txtDescription;
+
+    private DefaultListModel<String> listModel;
+    private JList<String> listProducts;
+    private LinkedList<String> productList;
+
+    private JButton btnAdd, btnUpdate, btnDelete, btnClear, btnClearFields;
+
+    ProductListing() {
+
+        setLayout(new BorderLayout(15, 15));
+        setBackground(new Color(222, 213, 191));
+        setBorder(new EmptyBorder(24, 30, 24, 30));
+
+        // Add of components
+
+        JLabel lblTitle = new JLabel("Product Listing");
+        lblTitle.setFont(new Font("Arial", Font.BOLD, 25));
+
+        JLabel lblSubtitle = new JLabel("Add, update, and manage the products in your shop.");
+        lblSubtitle.setFont(new Font("Arial", Font.PLAIN, 14));
+
+        JPanel heading = new JPanel();
+        heading.setOpaque(false);
+        heading.setLayout(new BoxLayout(heading, BoxLayout.Y_AXIS));
+        heading.add(lblTitle);
+        heading.add(Box.createVerticalStrut(6));
+        heading.add(lblSubtitle);
+        add(heading, BorderLayout.NORTH);
+
+        productList = new LinkedList<>();       // BE
+        listModel = new DefaultListModel<>();   // FE
+
+        JPanel content = new JPanel(new GridLayout(1, 2, 18, 0));
+        content.setOpaque(false);
+
+        JPanel form = new JPanel(new GridBagLayout());
+        form.setBackground(Color.WHITE);
+        form.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(225, 230, 238)),
+                new EmptyBorder(18, 18, 18, 18)));
+
+        txtName = new JTextField(18);
+        txtCategory = new JTextField(18);
+        txtPrice = new JTextField(18);
+        txtStock = new JTextField(18);
+        txtDescription = new JTextArea(4, 18);
+        txtDescription.setLineWrap(true);
+        txtDescription.setWrapStyleWord(true);
+
+        int row = 0;
+        addField(form, row++, "Product Name", txtName);
+        addField(form, row++, "Category", txtCategory);
+        addField(form, row++, "Price (PHP)", txtPrice);
+        addField(form, row++, "Stock Quantity", txtStock);
+        addField(form, row++, "Description", new JScrollPane(txtDescription));
+
+        JPanel formButtons = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 4));
+        formButtons.setOpaque(false);
+
+        btnAdd = new JButton("Add Product");
+        btnUpdate = new JButton("Update");
+        btnClearFields = new JButton("Clear Fields");
+
+        styleButton(btnAdd, new Color(114, 42, 53), Color.WHITE);
+        styleButton(btnUpdate, new Color(230, 234, 241), new Color(45, 55, 72));
+        styleButton(btnClearFields, new Color(230, 234, 241), new Color(45, 55, 72));
+
+        formButtons.add(btnAdd);
+        formButtons.add(btnUpdate);
+        formButtons.add(btnClearFields);
+
+        GridBagConstraints buttonC = new GridBagConstraints();
+        buttonC.gridx = 0;
+        buttonC.gridy = row;
+        buttonC.gridwidth = 2;
+        buttonC.anchor = GridBagConstraints.WEST;
+        buttonC.insets = new Insets(12, 4, 4, 4);
+        form.add(formButtons, buttonC);
+
+        JPanel listPanel = new JPanel(new BorderLayout(8, 8));
+        listPanel.setBackground(Color.WHITE);
+        listPanel.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(225, 230, 238)),
+                new EmptyBorder(18, 18, 18, 18)));
+
+        JLabel lblProducts = new JLabel("Your Products");
+        lblProducts.setFont(new Font("Arial", Font.BOLD, 16));
+        lblProducts.setForeground(new Color(114, 42, 53));
+        listPanel.add(lblProducts, BorderLayout.NORTH);
+
+        listProducts = new JList<>(listModel);
+        listProducts.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        listProducts.setFont(new Font("Arial", Font.PLAIN, 13));
+        listProducts.setFixedCellHeight(42);
+        listProducts.setBorder(new EmptyBorder(5, 5, 5, 5));
+
+        listProducts.addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                loadSelectedProduct();
+            }
+        });
+
+        listPanel.add(new JScrollPane(listProducts), BorderLayout.CENTER);
+
+        JPanel listButtons = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
+        listButtons.setOpaque(false);
+
+        btnDelete = new JButton("Delete Selected");
+        btnClear = new JButton("Clear All");
+
+        styleButton(btnDelete, new Color(190, 55, 55), Color.WHITE);
+        styleButton(btnClear, new Color(230, 234, 241), new Color(45, 55, 72));
+
+        listButtons.add(btnDelete);
+        listButtons.add(btnClear);
+        listPanel.add(listButtons, BorderLayout.SOUTH);
+
+        content.add(form);
+        content.add(listPanel);
+        add(content, BorderLayout.CENTER);
+
+        // Add ActionListener
+
+        btnAdd.addActionListener(this);
+        btnUpdate.addActionListener(this);
+        btnDelete.addActionListener(this);
+        btnClear.addActionListener(this);
+        btnClearFields.addActionListener(this);
+    }
+
+    private void addField(JPanel panel, int row, String label, JComponent field) {
+
+        GridBagConstraints c = new GridBagConstraints();
+        c.insets = new Insets(7, 4, 7, 4);
+        c.anchor = GridBagConstraints.NORTHWEST;
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.gridx = 0;
+        c.gridy = row;
+        c.weightx = 0;
+
+        JLabel lbl = new JLabel(label);
+        lbl.setFont(new Font("Arial", Font.BOLD, 12));
+        lbl.setForeground(new Color(114, 42, 53));
+        panel.add(lbl, c);
+
+        c.gridx = 1;
+        c.weightx = 1;
+
+        if (field instanceof JScrollPane) {
+            c.ipady = 42;
+        }
+
+        panel.add(field, c);
+    }
+
+    private void styleButton(JButton button, Color background, Color foreground) {
+
+        button.setFont(new Font("Arial", Font.BOLD, 12));
+        button.setBackground(background);
+        button.setForeground(foreground);
+        button.setFocusPainted(false);
+        button.setBorder(new EmptyBorder(9, 12, 9, 12));
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+
+        if (e.getSource() == btnAdd) {
+
+            String name = txtName.getText().trim();
+            String category = txtCategory.getText().trim();
+            String price = txtPrice.getText().trim();
+            String stock = txtStock.getText().trim();
+            String description = txtDescription.getText().trim();
+
+            if (!name.isEmpty() && !category.isEmpty()
+                    && !price.isEmpty() && !stock.isEmpty()) {
+
+                try {
+                    double productPrice = Double.parseDouble(price);
+                    int productStock = Integer.parseInt(stock);
+
+                    if (productPrice >= 0 && productStock >= 0) {
+
+                        String product = name + " | " + category
+                                + " | ₱" + productPrice
+                                + " | Stock: " + productStock
+                                + " | " + description;
+
+                        productList.add(product); // BE
+                        listModel.addElement(product); // FE
+
+                        clearFields();
+
+                        JOptionPane.showMessageDialog(this,
+                                "Product added successfully.");
+
+                    } else {
+                        JOptionPane.showMessageDialog(this,
+                                "Price and stock cannot be negative.",
+                                "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(this,
+                            "Enter a valid price and whole number for stock.",
+                            "Error", JOptionPane.ERROR_MESSAGE);
+                }
+
+            } else {
+                JOptionPane.showMessageDialog(this,
+                        "Complete the product name, category, price, and stock.",
+                        "Error", JOptionPane.ERROR_MESSAGE);
+            }
+
+        } else if (e.getSource() == btnUpdate) {
+
+            int indexSelected = listProducts.getSelectedIndex();
+
+            if (indexSelected != -1) {
+
+                String name = txtName.getText().trim();
+                String category = txtCategory.getText().trim();
+                String price = txtPrice.getText().trim();
+                String stock = txtStock.getText().trim();
+                String description = txtDescription.getText().trim();
+
+                if (!name.isEmpty() && !category.isEmpty()
+                        && !price.isEmpty() && !stock.isEmpty()) {
+
+                    try {
+                        double productPrice = Double.parseDouble(price);
+                        int productStock = Integer.parseInt(stock);
+
+                        if (productPrice >= 0 && productStock >= 0) {
+
+                            String updatedProduct = name + " | " + category
+                                    + " | ₱" + productPrice
+                                    + " | Stock: " + productStock
+                                    + " | " + description;
+
+                            productList.set(indexSelected, updatedProduct); // BE
+                            listModel.set(indexSelected, updatedProduct); // FE
+
+                            listProducts.setSelectedIndex(indexSelected);
+
+                            JOptionPane.showMessageDialog(this,
+                                    "Product updated successfully.");
+
+                        } else {
+                            JOptionPane.showMessageDialog(this,
+                                    "Price and stock cannot be negative.",
+                                    "Error", JOptionPane.ERROR_MESSAGE);
+                        }
+
+                    } catch (NumberFormatException ex) {
+                        JOptionPane.showMessageDialog(this,
+                                "Enter a valid price and whole number for stock.",
+                                "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+
+                } else {
+                    JOptionPane.showMessageDialog(this,
+                            "Complete the required product information.",
+                            "Error", JOptionPane.ERROR_MESSAGE);
+                }
+
+            } else {
+                JOptionPane.showMessageDialog(this,
+                        "Select a product first before updating.",
+                        "Error", JOptionPane.ERROR_MESSAGE);
+            }
+
+        } else if (e.getSource() == btnDelete) {
+
+            int indexSelected = listProducts.getSelectedIndex();
+
+            if (indexSelected != -1) {
+
+                productList.remove(indexSelected); // BE
+                listModel.removeElementAt(indexSelected); // FE
+
+                clearFields();
+
+            } else {
+                JOptionPane.showMessageDialog(this,
+                        "Select a product first before deleting.",
+                        "Error", JOptionPane.ERROR_MESSAGE);
+            }
+
+        } else if (e.getSource() == btnClear) {
+
+            if (!productList.isEmpty()) {
+
+                int confirm = JOptionPane.showConfirmDialog(this,
+                        "Are you sure you want to remove all products?",
+                        "Confirm Clear", JOptionPane.YES_NO_OPTION);
+
+                if (confirm == JOptionPane.YES_OPTION) {
+                    productList.clear(); // BE
+                    listModel.clear();   // FE
+                    clearFields();
+                }
+
+            } else {
+                JOptionPane.showMessageDialog(this,
+                        "There are no products to clear.");
+            }
+
+        } else if (e.getSource() == btnClearFields) {
+
+            clearFields();
+        }
+    }
+
+    private void loadSelectedProduct() {
+
+        int indexSelected = listProducts.getSelectedIndex();
+
+        if (indexSelected != -1) {
+
+            String product = productList.get(indexSelected);
+            String[] details = product.split(" \\| ", 5);
+
+            txtName.setText(details[0]);
+            txtCategory.setText(details[1]);
+
+            // Extract price without the peso sign
+            txtPrice.setText(details[2].replace("₱", ""));
+
+            // Extract stock quantity
+            txtStock.setText(details[3].replace("Stock: ", ""));
+
+            txtDescription.setText(details.length > 4 ? details[4] : "");
+        }
+    }
+
+    private void clearFields() {
+
+        txtName.setText("");
+        txtCategory.setText("");
+        txtPrice.setText("");
+        txtStock.setText("");
+        txtDescription.setText("");
+
+        listProducts.clearSelection();
+    }
+}

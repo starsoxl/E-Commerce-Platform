@@ -1,0 +1,231 @@
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import java.awt.*;
+import java.awt.event.*;
+import java.util.LinkedList;
+
+public class SellerAccountConfig extends JPanel implements ActionListener {
+
+    private JTextField txtStoreName, txtOwnerName, txtEmail;
+    private JTextField txtPhone, txtAddress;
+    private DefaultListModel<String> accountModel;
+    private JList<String> accountList;
+    private JButton btnSave, btnClear;
+    private LinkedList<String> accountListData;
+    private Color bgColor = new Color(222, 213, 191);
+
+    SellerAccountConfig() {
+
+        setLayout(new BorderLayout(15, 15));
+        setBackground(bgColor);
+        setBorder(new EmptyBorder(24, 30, 24, 30));
+
+        // TITLE
+        JLabel lblTitle = new JLabel("Seller Account Configuration");
+        lblTitle.setFont(new Font("Arial", Font.BOLD, 25));
+
+        JLabel lblSubtitle = new JLabel("Manage your shop information and seller details.");
+        lblSubtitle.setFont(new Font("Arial", Font.PLAIN, 14));
+
+        JPanel heading = new JPanel();
+        heading.setOpaque(false);
+        heading.setLayout(new BoxLayout(heading, BoxLayout.Y_AXIS));
+
+        heading.add(lblTitle);
+        heading.add(Box.createVerticalStrut(6));
+        heading.add(lblSubtitle);
+        add(heading, BorderLayout.NORTH);
+
+        // FORM PANEL
+        JPanel form = new JPanel(new GridBagLayout());
+        form.setBackground(Color.WHITE);
+        form.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(225, 230, 238)),
+                new EmptyBorder(24, 26, 24, 26)
+        ));
+
+        // TEXT FIELDS
+        txtStoreName = new JTextField(25);
+        txtOwnerName = new JTextField(25);
+        txtEmail = new JTextField(25);
+        txtPhone = new JTextField(25);
+        txtAddress = new JTextField(25);
+
+        // JLIST AND DEFAULTLISTMODEL
+        accountListData = new LinkedList<>(); // BE
+        accountModel = new DefaultListModel<>(); // FE
+        accountList = new JList<>(accountModel);
+        accountList.setFont(new Font("Arial", Font.PLAIN, 13));
+        accountList.setBackground(Color.WHITE);
+        accountList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        accountList.setVisibleRowCount(6);
+
+        // ADD FORM FIELDS
+        int row = 0;
+
+        addField(form, row++, "Store Name", txtStoreName);
+        addField(form, row++, "Seller / Owner Name", txtOwnerName);
+        addField(form, row++, "E-mail Address", txtEmail);
+        addField(form, row++, "Mobile Number", txtPhone);
+        addField(form, row++, "Store Address", txtAddress);
+        addField(form, row++, "Seller Account Information", new JScrollPane(accountList));
+
+        // FORM SCROLL
+        JScrollPane formScroll = new JScrollPane(form);
+        formScroll.setBorder(null);
+        formScroll.getViewport().setBackground(bgColor);
+
+        add(formScroll, BorderLayout.CENTER);
+
+        // BUTTON PANEL
+        JPanel actions = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
+        actions.setOpaque(false);
+
+        btnClear = new JButton("Clear");
+        btnSave = new JButton("Save Changes");
+
+        styleButton(btnClear, new Color(230, 234, 241), new Color(45, 55, 72));
+        styleButton(btnSave, new Color(230, 234, 241), new Color(45, 55, 72));
+
+        // ACTION LISTENER
+        btnClear.addActionListener(this);
+        btnSave.addActionListener(this);
+
+        actions.add(btnClear);
+        actions.add(btnSave);
+
+        add(actions, BorderLayout.SOUTH);
+
+        // LIST SELECTION
+        accountList.addListSelectionListener(e -> {
+
+            if (!e.getValueIsAdjusting()) {
+
+                int selected = accountList.getSelectedIndex();
+
+                if (selected != -1) {
+
+                    String selectedInfo = accountListData.get(selected);
+                    String[] details = selectedInfo.split(": ", 2);
+
+                    if (details.length == 2) {
+
+                        if (selected == 0) {
+                            txtStoreName.setText(details[1]);
+                        } else if (selected == 1) {
+                            txtOwnerName.setText(details[1]);
+                        } else if (selected == 2) {
+                            txtEmail.setText(details[1]);
+                        } else if (selected == 3) {
+                            txtPhone.setText(details[1]);
+                        } else if (selected == 4) {
+                            txtAddress.setText(details[1]);
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // ADD FORM FIELD
+    private void addField(JPanel panel, int row, String label, JComponent field) {
+
+        GridBagConstraints c = new GridBagConstraints();
+        c.insets = new Insets(8, 8, 8, 8);
+        c.anchor = GridBagConstraints.NORTHWEST;
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.gridx = 0;
+        c.gridy = row;
+        c.weightx = 0;
+
+        JLabel lbl = new JLabel(label);
+        lbl.setFont(new Font("Arial", Font.BOLD, 13));
+
+        panel.add(lbl, c);
+
+        c.gridx = 1;
+        c.weightx = 1;
+
+        if (field instanceof JScrollPane) {
+            c.ipady = 90;
+        }
+
+        panel.add(field, c);
+    }
+
+    // BUTTON DESIGN
+    private void styleButton(JButton button, Color background, Color foreground) {
+
+        button.setFont(new Font("Arial", Font.BOLD, 13));
+        button.setBackground(background);
+        button.setForeground(foreground);
+        button.setFocusPainted(false);
+        button.setBorder(new EmptyBorder(10, 18, 10, 18));
+    }
+
+    // ACTION EVENT
+    @Override
+    public void actionPerformed(ActionEvent e) {
+
+        if (e.getSource() == btnSave) {
+
+            String storeName = txtStoreName.getText().trim();
+            String ownerName = txtOwnerName.getText().trim();
+            String email = txtEmail.getText().trim();
+            String phone = txtPhone.getText().trim();
+            String address = txtAddress.getText().trim();
+
+            // VALIDATION
+            if (storeName.isEmpty()
+                    || ownerName.isEmpty()
+                    || email.isEmpty()
+                    || phone.isEmpty()
+                    || address.isEmpty()) {
+
+                JOptionPane.showMessageDialog(this,
+                        "Please complete all fields!",
+                        "Missing Information",
+                        JOptionPane.WARNING_MESSAGE);
+
+            } else {
+
+                // SAVE INFORMATION TO LINKEDLIST
+                accountListData.clear();
+
+                accountListData.add("STORE NAME: " + storeName);
+                accountListData.add("OWNER NAME: " + ownerName);
+                accountListData.add("EMAIL: " + email);
+                accountListData.add("MOBILE NUMBER: " + phone);
+                accountListData.add("STORE ADDRESS: " + address);
+
+                // DISPLAY INFORMATION TO JLIST
+                accountModel.clear();
+
+                for (String account : accountListData) {
+                    accountModel.addElement(account);
+                }
+
+                JOptionPane.showMessageDialog(this,
+                        "Seller account information saved successfully!",
+                        "Success",
+                        JOptionPane.INFORMATION_MESSAGE);
+            }
+
+        } else if (e.getSource() == btnClear) {
+
+            txtStoreName.setText("");
+            txtOwnerName.setText("");
+            txtEmail.setText("");
+            txtPhone.setText("");
+            txtAddress.setText("");
+
+            accountListData.clear();
+            accountModel.clear();
+
+            accountList.clearSelection();
+
+            JOptionPane.showMessageDialog(this,
+                    "All fields have been cleared!");
+        }
+    }
+}

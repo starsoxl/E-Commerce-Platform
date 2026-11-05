@@ -1,0 +1,37 @@
+import java.awt.*;
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+
+public class SellerConfig extends JFrame {
+    
+    SellerConfig (){
+        setTitle("Shippiedie | Seller Center");
+        setSize(1280, 720);
+        setMinimumSize(new Dimension(900, 620));
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+        
+
+        JPanel mainPanel = new JPanel(new BorderLayout());
+        mainPanel.setBackground(Color.WHITE);
+
+        JPanel header = new JPanel(new BorderLayout());
+        header.setBackground(new Color(207, 174, 96));
+        header.setBorder(new EmptyBorder(18, 28, 18, 28));
+
+        JLabel lblBrand = new JLabel("Shippiedie");
+        lblBrand.setFont(new Font("Arial", Font.BOLD, 27));
+        lblBrand.setForeground(new Color(114, 42, 53));
+
+        header.add(lblBrand, BorderLayout.WEST);
+        mainPanel.add(header, BorderLayout.NORTH);
+
+        JTabbedPane tabs = new JTabbedPane();
+        tabs.setFont(new Font("Arial", Font.BOLD, 14));
+        tabs.addTab("Seller Account Config", new SellerAccountConfig());
+        tabs.addTab("Product Listing", new ProductListing());
+        mainPanel.add(tabs, BorderLayout.CENTER);
+        add(mainPanel);
+    }
+    
+}
